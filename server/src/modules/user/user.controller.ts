@@ -27,7 +27,7 @@ export class UserController {
       lastAccess: new Date(),
       Role: {
         connect: {
-          id: "ADMIN",
+          id: "999",
         },
       },
     });

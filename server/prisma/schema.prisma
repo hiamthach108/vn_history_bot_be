@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,15 +5,6 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-}
-
-model Base {
-  id        String   @id @default(cuid())
-  metadata  String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  createdBy String?
-  updatedBy String?
 }
 
 model Role {
@@ -39,29 +24,250 @@ model User {
   lastAccess DateTime
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
-  Role       Role     @relation(fields: [roleId], references: [id])
+
+  Role Role @relation(fields: [roleId], references: [id])
+
+  createdConversations Conversation[] @relation("CreatedConversations")
+  updatedConversations Conversation[] @relation("UpdatedConversations")
+  createdPricingPlans  PricingPlan[]  @relation("CreatedPricingPlans")
+  updatedPricingPlans  PricingPlan[]  @relation("UpdatedPricingPlans")
+  createdSubscription  Subscription[] @relation("CreatedSubscriptions")
+  updatedSubscription  Subscription[] @relation("UpdatedSubscriptions")
+  createdTransaction   Transaction[]  @relation("CreatedTransactions")
+  updatedTransaction   Transaction[]  @relation("UpdatedTransactions")
+  createdComments      Comment[]      @relation("CreatedComments")
+  updatedComments      Comment[]      @relation("UpdatedComments")
+  createdReactions     Reaction[]     @relation("CreatedReactions")
+  updatedReactions     Reaction[]     @relation("UpdatedReactions")
+  createdEvents        Event[]        @relation("CreatedEvents")
+  updatedEvents        Event[]        @relation("UpdatedEvents")
+  createdPersons       Person[]       @relation("CreatedPersons")
+  updatedPersons       Person[]       @relation("UpdatedPersons")
+  createdArtifacts     Artifact[]     @relation("CreatedArtifacts")
+  updatedArtifacts     Artifact[]     @relation("UpdatedArtifacts")
+  createdPlaces        Place[]        @relation("CreatedPlaces")
+  updatedPlaces        Place[]        @relation("UpdatedPlaces")
+  createdTopics        Topic[]        @relation("CreatedTopics")
+  updatedTopics        Topic[]        @relation("UpdatedTopics")
 }
 
-model HistoricalData {
-  id        String      @id @default(cuid())
+model Conversation {
+  id          String   @id @default(cuid())
+  name        String
+  thumbnail   String
+  metadata    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   String
+  updatedBy   String
+  createdUser User     @relation("CreatedConversations", fields: [createdBy], references: [id])
+  updatedUser User     @relation("UpdatedConversations", fields: [updatedBy], references: [id])
+}
+
+model PricingPlan {
+  id          String   @id @default(cuid())
+  name        String
+  description String
+  price       Float
+  duration    String
+  metadata    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   String
+  updatedBy   String
+
+  createdUser User @relation("CreatedPricingPlans", fields: [createdBy], references: [id])
+  updatedUser User @relation("UpdatedPricingPlans", fields: [updatedBy], references: [id])
+}
+
+model Subscription {
+  id        String             @id @default(cuid())
+  planId    String
+  expiredAt DateTime
+  status    SubscriptionStatus
+  metadata  String?
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+  createdBy String
+  updatedBy String
+
+  createdUser User @relation("CreatedSubscriptions", fields: [createdBy], references: [id])
+  updatedUser User @relation("UpdatedSubscriptions", fields: [updatedBy], references: [id])
+}
+
+model Transaction {
+  id        String            @id @default(cuid())
+  price     Float
+  payMethod String
+  status    TransactionStatus
+  metadata  String?
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+  createdBy String
+  updatedBy String
+
+  createdUser User @relation("CreatedTransactions", fields: [createdBy], references: [id])
+  updatedUser User @relation("UpdatedTransactions", fields: [updatedBy], references: [id])
+}
+
+model Comment {
+  id            String   @id @default(cuid())
+  content       String
+  parentId      String?
+  reactionCount Int
+  metadata      String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  createdBy     String
+  updatedBy     String
+
+  createdUser User @relation("CreatedComments", fields: [createdBy], references: [id])
+  updatedUser User @relation("UpdatedComments", fields: [updatedBy], references: [id])
+
+  Reaction Reaction[]
+}
+
+model Reaction {
+  id        String   @id @default(cuid())
+  type      Int
+  commentId String
+  metadata  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  createdBy String
+  updatedBy String
+
+  createdUser User @relation("CreatedReactions", fields: [createdBy], references: [id])
+  updatedUser User @relation("UpdatedReactions", fields: [updatedBy], references: [id])
+
+  Comment Comment @relation(fields: [commentId], references: [id])
+}
+
+// history
+model Event {
+  id        String     @id @default(cuid())
   name      String
   brief     String
   content   String
+  location  String
   startDate DateTime
   endDate   DateTime
-  location  String
-  thumbnail String
-  type      HistoryType
+  status    DataStatus
   metadata  String?
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
-  createdBy String?
-  updatedBy String?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  createdBy String
+  updatedBy String
+
+  createdUser User @relation("CreatedEvents", fields: [createdBy], references: [id])
+  updatedUser User @relation("UpdatedEvents", fields: [updatedBy], references: [id])
+
+  persons   Person[]
+  artifacts Artifact[]
+  places    Place[]
+  topics    Topic[]
 }
 
-enum HistoryType {
-  EVENT
-  CAMPAIGN
-  FIGURE
-  ERA
+model Person {
+  id        String     @id @default(cuid())
+  name      String
+  biography String
+  birthDate DateTime
+  deathDate DateTime
+  thumbnail String
+  status    DataStatus
+  metadata  String?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  createdBy String
+  updatedBy String
+
+  createdUser User @relation("CreatedPersons", fields: [createdBy], references: [id])
+  updatedUser User @relation("UpdatedPersons", fields: [updatedBy], references: [id])
+
+  events Event[]
+}
+
+model Artifact {
+  id            String     @id @default(cuid())
+  name          String
+  description   String
+  locationFound String
+  thumbnail     String
+  status        DataStatus
+  metadata      String?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  createdBy     String
+  updatedBy     String
+
+  createdUser User @relation("CreatedArtifacts", fields: [createdBy], references: [id])
+  updatedUser User @relation("UpdatedArtifacts", fields: [updatedBy], references: [id])
+
+  events Event[]
+}
+
+model Place {
+  id          String     @id @default(cuid())
+  name        String
+  description String
+  location    String
+  thumbnail   String
+  status      DataStatus
+  metadata    String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  createdBy   String
+  updatedBy   String
+
+  createdUser User @relation("CreatedPlaces", fields: [createdBy], references: [id])
+  updatedUser User @relation("UpdatedPlaces", fields: [updatedBy], references: [id])
+
+  events Event[]
+}
+
+model Topic {
+  id          String      @id @default(cuid())
+  name        String
+  description String
+  thumbnail   String
+  status      TopicStatus
+  metadata    String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  createdBy   String
+  updatedBy   String
+
+  createdUser User @relation("CreatedTopics", fields: [createdBy], references: [id])
+  updatedUser User @relation("UpdatedTopics", fields: [updatedBy], references: [id])
+
+  events Event[]
+}
+
+enum DataStatus {
+  DRAFT
+  PENDING
+  PUBLISHED
+  REJECTED
+  DELETED
+}
+
+enum TopicStatus {
+  PUBLISHED
+  PENDING
+  ACHIEVED
+  DISABLED
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PENDING
+  EXPIRED
+  CANCELLED
+}
+
+enum TransactionStatus {
+  PENDING
+  SUCCESS
+  FAILED
 }

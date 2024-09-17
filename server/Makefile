@@ -9,4 +9,7 @@ run:
 migrate:
 	npx prisma migrate dev --name $(name)
 
+db-pull:
+	npx prisma db pull
+
 .PHONY: build run migrate
