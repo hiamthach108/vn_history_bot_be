@@ -1,0 +1,19 @@
+# Node modules
+node_modules
+npm-debug.log
+yarn-error.log
+
+# Logs
+logs
+*.log
+
+# Docker files
+Dockerfile*
+docker-compose*
+
+# Miscellaneous
+.DS_Store
+*.swp
+.idea
+.vscode
+*.iml

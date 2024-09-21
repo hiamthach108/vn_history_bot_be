@@ -12,4 +12,7 @@ migrate:
 db-pull:
 	npx prisma db pull
 
+build:
+	docker build -t vn_history_bot_server .
+
 .PHONY: build run migrate
