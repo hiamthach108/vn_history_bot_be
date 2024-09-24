@@ -15,4 +15,9 @@ db-pull:
 build:
 	docker build -t vn_history_bot_server .
 
-.PHONY: build run migrate
+release:
+	docker build --build-arg APP_VERSION=$(version) -t vn_history_bot_server -f Dockerfile .
+	docker tag vn_history_bot_server vnhistorybot.azurecr.io/vnhistorybot:$(version)
+	docker push vnhistorybot.azurecr.io/vnhistorybot:$(version)
+
+.PHONY: build run migrate release
